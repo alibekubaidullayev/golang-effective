@@ -26,3 +26,5 @@ go.work.sum
 
 # Ignore all .db files
 *.db
+
+app
