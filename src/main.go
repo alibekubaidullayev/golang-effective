@@ -40,6 +40,7 @@ func main() {
 	slog.SetDefault(logger)
 
 	router := gin.New()
+	// just a comment
 	router.Use(ginlogger.New(logger))
 	router.Use(ginrecovery.New(logger))
 	routes.RegisterUserRoutes(router, "users")
