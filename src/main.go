@@ -2,37 +2,52 @@ package main
 
 import (
 	"log/slog"
-	"net/http"
+	"os"
 
 	"rest/core"
 	"rest/db"
 	"rest/routes"
 
+	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+
+	ginlogger "github.com/FabienMht/ginslog/logger"
+	ginrecovery "github.com/FabienMht/ginslog/recovery"
+	"github.com/phsym/console-slog"
 )
 
 var AppConfig *core.Config
 
 func init() {
-	err := godotenv.Load(".env")
-	if err != nil {
+	if err := godotenv.Load(".env"); err != nil {
 		slog.Error("Error loading .env file. Default config values will be used")
 	}
-	AppConfig = core.LoadConfig()
 }
 
 func main() {
 	slog.Info("Starting Application")
 
-	db.InitDB(*AppConfig)
-	router := http.NewServeMux()
-	routes.RegisterUserRoutes(router, "usersas")
+	AppConfig = core.LoadConfig()
+
+	if err := db.InitDB(*AppConfig); err != nil {
+		slog.Error("Failed to initialize database", "error", err)
+		os.Exit(1)
+	}
+
+	logger := slog.New(
+		console.NewHandler(os.Stderr, &console.HandlerOptions{Level: slog.LevelDebug}),
+	)
+	slog.SetDefault(logger)
+
+	router := gin.New()
+	router.Use(ginlogger.New(logger))
+	router.Use(ginrecovery.New(logger))
+	routes.RegisterUserRoutes(router, "users")
+
 	port := AppConfig.Port
-
 	slog.Info("Starting server on", "port", port)
-	slog.Debug("Debuging")
-
-	if err := http.ListenAndServe(":"+port, router); err != nil {
-		slog.Error("Could not start server: %v", err)
+	if err := router.Run(":" + port); err != nil {
+		slog.Error("Failed to start server", "error", err)
+		os.Exit(1)
 	}
 }

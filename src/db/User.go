@@ -1,13 +1,12 @@
 package db
 
-import (
-	"gorm.io/gorm"
-)
+import "time"
 
 type Person struct {
-	gorm.Model
-	PassSeries uint
-	PassNumber uint
+	ID         uint `gorm:"primaryKey"`
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
+	PassNumber string
 	Surname    string
 	Name       string
 	Patronymic string

@@ -1,14 +1,16 @@
 package routes
 
 import (
-	"net/http"
 	"rest/controllers"
+
+	"github.com/gin-gonic/gin"
 )
 
-func RegisterUserRoutes(router *http.ServeMux, parentRoute string) {
-	if parentRoute == "" {
-		parentRoute = "users"
-	}
-	router.HandleFunc(RouteMaker("GET", parentRoute, ""), controllers.GetUser)
-	router.HandleFunc(RouteMaker("POST", parentRoute, ""), controllers.CreateUser)
+func RegisterUserRoutes(router *gin.Engine, routeName string) {
+	userRoutes := router.Group(routeName)
+	userRoutes.GET("", controllers.ListUsers)
+	userRoutes.GET("/:id", controllers.GetUser)
+	userRoutes.POST("", controllers.CreateUser)
+	userRoutes.DELETE("/:id", controllers.DeleteUser)
+	userRoutes.PATCH("/:id", controllers.UpdateUser)
 }

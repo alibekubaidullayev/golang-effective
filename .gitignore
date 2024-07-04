@@ -21,4 +21,8 @@
 go.work
 go.work.sum
 
-/*.db
+# Ignore all .env files
+*.env
+
+# Ignore all .db files
+*.db
