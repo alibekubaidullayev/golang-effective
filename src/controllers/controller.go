@@ -11,7 +11,6 @@ import (
 )
 
 func List(c *gin.Context, t reflect.Type) {
-	fmt.Println("Entered List")
 	params := make(map[string]interface{})
 
 	for key, values := range c.Request.URL.Query() {
@@ -53,6 +52,16 @@ func Create(c *gin.Context, t reflect.Type) {
 
 	if !readJSON(c, object) {
 		return
+	}
+
+	if validatable, ok := object.(db.Validatable); ok {
+		if err := validatable.Validate(); err != nil {
+			slog.Error("Validation error", "error", err)
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": fmt.Sprintf("Validation error for %s", err),
+			})
+			return
+		}
 	}
 
 	if err := db.DB.Create(object).Error; err != nil {

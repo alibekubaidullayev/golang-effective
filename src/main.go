@@ -43,6 +43,7 @@ func main() {
 	router.Use(ginlogger.New(logger))
 	router.Use(ginrecovery.New(logger))
 	routes.RegisterUserRoutes(router, "users")
+	routes.RegisterTaskRoutes(router, "tasks")
 
 	port := AppConfig.Port
 	slog.Info("Starting server on", "port", port)
