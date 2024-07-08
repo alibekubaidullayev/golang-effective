@@ -1,18 +1,17 @@
 package core
 
 import (
-	"fmt"
 	"os"
 )
 
 func LoadConfig() *Config {
 	return &Config{
 		Port:     getEnv("PORT", "8080"),
-		Host:     getEnv("HOST", "localhost"),
-		User:     getEnv("USER", "postgres"),
-		Password: getEnv("PASSWORD", "1"),
-		DBName:   getEnv("DBNAME", "rest"),
-		DBPort:   getEnv("DBPORT", "5432"),
+		Host:     getEnv("DB_HOST", "localhost"),
+		User:     getEnv("DB_USER", "postgres"),
+		Password: getEnv("DB_PASSWORD", "1"),
+		DBName:   getEnv("DB_NAME", "rest"),
+		DBPort:   getEnv("DB_PORT", "5432"),
 	}
 }
 
@@ -23,17 +22,6 @@ type Config struct {
 	Password string
 	DBName   string
 	DBPort   string
-}
-
-func (c Config) DSN() string {
-	return fmt.Sprintf(
-		"host=%s user=%s password=%s dbname=%s port=%s",
-		c.Host,
-		c.User,
-		c.Password,
-		c.DBName,
-		c.DBPort,
-	)
 }
 
 func getEnv(key, fallback string) string {

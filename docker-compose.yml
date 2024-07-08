@@ -2,28 +2,28 @@ version: "3.8"
 
 services:
   db:
-    image: postgres:13
+    image: postgres:13.0-alpine
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: 1
-      POSTGRES_DB: db
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     ports:
-      - "5432:5432"
+      - "${DB_PORT}:${DB_PORT}"
+    restart: always
     volumes:
       - postgres-data:/var/lib/postgresql/data
 
-  # app:
-  #   build: .
-  #   ports:
-  #     - "8080:8080"
-  #   depends_on:
-  #     - db
-  #   environment:
-  #     DB_HOST: db
-  #     DB_PORT: 5432
-  #     DB_USER: user
-  #     DB_PASSWORD: password
-  #     DB_NAME: mydatabase
+  app:
+    build:
+      context: ./src
+      dockerfile: Dockerfile
+    ports:
+      - "${PORT}:${PORT}"
+    restart: always
+    depends_on:
+      - db
+    volumes:
+      - ./.env:/app/.env
 
 volumes:
   postgres-data:

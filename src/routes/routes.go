@@ -38,4 +38,7 @@ func RegisterUserRoutes(router *gin.Engine, routeName string) {
 func RegisterTaskRoutes(router *gin.Engine, routeName string) {
 	taskRoutes := router.Group(routeName)
 	regCRUD(taskRoutes, db.Task{})
+	taskRoutes.POST("/assign", controllers.AssignUserToTask)
+	taskRoutes.POST("/end", controllers.EndTask)
+	taskRoutes.GET("/calculate", controllers.CalculatePayment)
 }

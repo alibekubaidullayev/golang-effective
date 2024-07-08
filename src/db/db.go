@@ -5,8 +5,7 @@ import (
 	"reflect"
 	"rest/core"
 
-	"gorm.io/driver/sqlite"
-
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
@@ -16,9 +15,16 @@ func InitDB(AppConfig core.Config) error {
 	slog.Info("Initializing DataBase")
 
 	var err error
-	// dsn := "host=localhost user=user password=1 dbname=db port=5432"
-	// DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	DB, err = gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
+
+	dsn := ("host=" + AppConfig.Host +
+		" user=" + AppConfig.User +
+		" password=" + AppConfig.Password +
+		" dbname=" + AppConfig.DBName +
+		" port=" + AppConfig.DBPort +
+		" sslmode=disable")
+
+	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	// DB, err = gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
 	if err != nil {
 		slog.Error("Failed to connect to database", "error", err)
 		return err

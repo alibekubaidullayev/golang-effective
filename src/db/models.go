@@ -1,21 +1,10 @@
 package db
 
 import (
-	"errors"
-	"fmt"
 	"time"
 )
 
 type Status string
-
-type FieldLength struct {
-	Field  string
-	Length int
-}
-
-type Validatable interface {
-	Validate() error
-}
 
 const (
 	Pending    Status = "pending"
@@ -26,10 +15,10 @@ const (
 type Person struct {
 	ID         uint   `gorm:"primaryKey"`
 	PassNumber string `gorm:"not null;unique;size:10"`
-	Surname    string `gorm:"not null;size:100"`
-	Name       string `gorm:"not null;size:100"`
-	Patronymic string `gorm:"not null;size:100"`
-	Address    string `gorm:"not null;size:100"`
+	Surname    string `gorm:"not null;size:255"`
+	Name       string `gorm:"not null;size:255"`
+	Patronymic string `gorm:"not null;size:255"`
+	Address    string `gorm:"not null;size:255"`
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
 }
@@ -52,28 +41,6 @@ type TaskUser struct {
 	Task        Task   `gorm:"foreignKey:TaskID"`
 	User        Person `gorm:"foreignKey:UserID"`
 	StartDate   time.Time
-	EndDate     time.Time
-	PaymentRate float64 `gorm:"not null"`
-}
-
-func (p Person) Validate() error {
-	fields := map[string]FieldLength{
-		"Surname":    {p.Surname, 100},
-		"Name":       {p.Name, 100},
-		"Patronymic": {p.Patronymic, 100},
-		"Address":    {p.Address, 100},
-	}
-
-	for fieldName, fieldValue := range fields {
-		if len(fieldValue.Field) > fieldValue.Length {
-			return errors.New(
-				fmt.Sprintf(
-					"%s exceeds %d characters",
-					fieldName,
-					fieldValue.Length),
-			)
-		}
-	}
-
-	return nil
+	EndDate     *time.Time `gorm:"default:null"`
+	PaymentRate float64    `gorm:"not null"`
 }

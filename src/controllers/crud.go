@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"reflect"
 	"rest/db"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,12 +15,27 @@ func List(c *gin.Context, t reflect.Type) {
 	params := make(map[string]interface{})
 
 	for key, values := range c.Request.URL.Query() {
+		if key == "page" || key == "page_size" {
+			continue
+		}
 		params[key] = values
 	}
 
 	objects := reflect.MakeSlice(reflect.SliceOf(t), 0, 0).Interface()
 
-	if err := db.DB.Where(params).Find(&objects).Error; err != nil {
+	page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
+	if err != nil || page < 1 {
+		page = 1
+	}
+	pageSize, err := strconv.Atoi(c.DefaultQuery("page_size", "10"))
+	if err != nil || pageSize < 1 {
+		pageSize = 10
+	}
+	offset := (page - 1) * pageSize
+
+	query := db.DB.Where(params).Offset(offset).Limit(pageSize).Find(&objects)
+
+	if err := query.Error; err != nil {
 		slog.Error("Error listing objects", "type", t.Name(), "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": fmt.Sprintf("Error listing %s", t.Name()),
@@ -52,16 +68,6 @@ func Create(c *gin.Context, t reflect.Type) {
 
 	if !readJSON(c, object) {
 		return
-	}
-
-	if validatable, ok := object.(db.Validatable); ok {
-		if err := validatable.Validate(); err != nil {
-			slog.Error("Validation error", "error", err)
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": fmt.Sprintf("Validation error for %s", err),
-			})
-			return
-		}
 	}
 
 	if err := db.DB.Create(object).Error; err != nil {

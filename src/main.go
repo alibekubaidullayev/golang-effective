@@ -18,13 +18,11 @@ import (
 
 var AppConfig *core.Config
 
-func init() {
-	if err := godotenv.Load(".env"); err != nil {
-		slog.Error("Error loading .env file. Default config values will be used")
-	}
-}
-
 func main() {
+	if err := godotenv.Load(".env"); err != nil {
+		slog.Error("Error loading .env file.")
+		os.Exit(1)
+	}
 	slog.Info("Starting Application")
 
 	AppConfig = core.LoadConfig()
